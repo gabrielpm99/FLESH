@@ -28,29 +28,37 @@ public class Jogador {
 
 
     public void movimentarJogador(Mapa mapa) {
+        double dx = 0, dy = 0;
+
         if(this.movimentando_cima) {
-            if(!(mapa.checarColisaoMapa(this.coord_x, (this.coord_y - this.velocidade_jogador)))) {
-                this.coord_y -= this.velocidade_jogador;
-            }
+            if(!(mapa.checarColisaoMapa(this.coord_x, (this.coord_y - this.velocidade_jogador))))
+                dy -= 1;
         }
 
         if(this.movimentando_baixo) {
-            if(!(mapa.checarColisaoMapa(this.coord_x, ((this.coord_y + this.largura_jogador) + this.velocidade_jogador)))) {
-                this.coord_y += this.velocidade_jogador;
-            }
+            if(!(mapa.checarColisaoMapa(this.coord_x, ((this.coord_y + this.largura_jogador) + this.velocidade_jogador))))
+                dy += 1;
         }
 
         if(this.movimentando_esquerda) {
-            if(!(mapa.checarColisaoMapa((this.coord_x - this.velocidade_jogador), this.coord_y))) {
-                this.coord_x -= this.velocidade_jogador;
-            }
+            if(!(mapa.checarColisaoMapa((this.coord_x - this.velocidade_jogador), this.coord_y)))
+                dx -= 1;
         }
 
         if(this.movimentando_direita) {
-            if(!(mapa.checarColisaoMapa(((this.coord_x + this.largura_jogador) + this.velocidade_jogador), this.coord_y))) {
-                this.coord_x += this.velocidade_jogador;
-            }
+            if(!(mapa.checarColisaoMapa(((this.coord_x + this.largura_jogador) + this.velocidade_jogador), this.coord_y)))
+                dx += 1;
         }
+
+        double comprimento = Math.sqrt(dx * dx + dy * dy);
+
+        if (comprimento > 0) {
+            dx /= comprimento;
+            dy /= comprimento;
+        }
+
+        this.coord_x += dx * velocidade_jogador;
+        this.coord_y += dy * velocidade_jogador;
     }
     
 
