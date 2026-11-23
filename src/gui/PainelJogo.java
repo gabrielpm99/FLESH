@@ -6,13 +6,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import javax.swing.JPanel;
 
-import input.InputTeclado;
 import main.Game;
 
 public class PainelJogo extends JPanel {
     private final Game game;
-
-    private final InputTeclado input_teclado;
 
     public PainelJogo(Game game) {
         if(game == null) {
@@ -21,10 +18,8 @@ public class PainelJogo extends JPanel {
 
 
         this.game = game;
-
-        this.input_teclado = game.getInputTeclado();
         
-        addKeyListener(input_teclado);
+        addKeyListener(game.getInputTeclado());
         setFocusable(true);
 
         setPreferredSize(new Dimension(Game.LARGURA_JANELA, Game.ALTURA_JANELA));

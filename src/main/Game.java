@@ -129,12 +129,6 @@ public class Game {
     }
 
     private void gerarMonstros() {
-        if(this.lista_monstros.size() >= QUANTIDADE_MONSTROS) {
-            this.timer_respawn_monstros.stop();
-            return;
-        }
-
-        
         Monstro monstro;
             
         do {
@@ -152,6 +146,10 @@ public class Game {
 
         this.lista_monstros.add(monstro);
         this.lista_elementos_desenhaveis.addFirst(monstro);
+
+        if(this.lista_monstros.size() >= QUANTIDADE_MONSTROS) {
+            this.timer_respawn_monstros.stop();
+        }
     }
 
     private void popularListaMonstros() {
@@ -175,6 +173,10 @@ public class Game {
 
 
     public void setPainel(PainelJogo painel) {
+        if(painel == null) {
+            throw new IllegalArgumentException("A instância de painel não pode ser nula");
+        }
+
         this.painel = painel;
     }
 
@@ -184,6 +186,7 @@ public class Game {
 
     public void parar() {
         this.timer_jogo.stop();
+        this.timer_respawn_monstros.stop();
     }
 
 
@@ -193,6 +196,10 @@ public class Game {
     }
 
     public void desenharElementos(Graphics2D g2d) {
+        if(g2d == null) {
+            throw new IllegalArgumentException("A instância de g2d (gui) não pode ser nula");
+        }
+
         for(Desenhavel elemento : this.lista_elementos_desenhaveis) {
             elemento.desenhar(g2d);
         }

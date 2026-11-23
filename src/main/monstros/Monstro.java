@@ -23,6 +23,11 @@ public class Monstro extends Entidade {
     
     public Monstro(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial, int distancia_fuga) {
         super(largura, altura, velocidade, coord_x_inicial, coord_y_inicial);
+        
+        if(distancia_fuga <= 0) {
+            throw new IllegalArgumentException("A distância de fuga não pode ser menor ou igual a 0");
+        }
+        
 
         this.distancia_fuga = distancia_fuga;
 
@@ -77,6 +82,11 @@ public class Monstro extends Entidade {
 
 
     public void fugir(Jogador jogador) {
+        if(jogador == null) {
+            throw new IllegalArgumentException("A instância de jogador não pode ser nula");
+        }
+
+
         int distancia_eixo_x = Math.abs(this.coord_x - jogador.getCoordX());
         int distancia_eixo_y = Math.abs(this.coord_y - jogador.getCoordY());
 
