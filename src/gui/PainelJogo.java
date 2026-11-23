@@ -10,23 +10,24 @@ import input.InputTeclado;
 import main.Game;
 
 public class PainelJogo extends JPanel {
-    public static final int LARGURA_JANELA = 1366;
-    public static final int ALTURA_JANELA = 768;
+    private final Game game;
 
-    private Game game;
-
-    private InputTeclado input_teclado;
+    private final InputTeclado input_teclado;
 
     public PainelJogo(Game game) {
+        if(game == null) {
+            throw new IllegalArgumentException("A instância de game não pode ser nula");
+        }
+
+
         this.game = game;
 
-        this.input_teclado = new InputTeclado(game.jogador);
+        this.input_teclado = game.getInputTeclado();
         
         addKeyListener(input_teclado);
         setFocusable(true);
-        requestFocusInWindow();
 
-        setPreferredSize(new Dimension(LARGURA_JANELA, ALTURA_JANELA));
+        setPreferredSize(new Dimension(Game.LARGURA_JANELA, Game.ALTURA_JANELA));
     }
 
     @Override
@@ -36,18 +37,8 @@ public class PainelJogo extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, LARGURA_JANELA, ALTURA_JANELA);
+        g2d.fillRect(0, 0, Game.LARGURA_JANELA, Game.ALTURA_JANELA);
 
-        g2d.setColor(Color.BLACK);
-        g2d.drawRect(game.mapa.getCoordXMapa(), 
-                     game.mapa.getCoordYMapa(), 
-                     game.mapa.getLarguraMapa(), 
-                     game.mapa.getAlturaMapa());
-
-        g2d.setColor(Color.BLUE);
-        g2d.fillRect(game.jogador.getCoordXJogador(), 
-                     game.jogador.getCoordYJogador(), 
-                     game.jogador.getLarguraJogador(), 
-                     game.jogador.getAlturaJogador());
+        game.desenharElementos(g2d);
     }
 }

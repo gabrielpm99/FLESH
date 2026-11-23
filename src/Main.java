@@ -8,8 +8,8 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             new JanelaJogo(game);
-        });
 
-        game.iniciarJogo();
+            game.iniciar();
+        });
     }
 }

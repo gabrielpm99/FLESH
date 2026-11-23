@@ -1,95 +1,96 @@
 package main.jogador;
 
+import main.entidade.Entidade;
 import main.mapa.Mapa;
 
-public class Jogador {
-    private int largura_jogador;
-    private int altura_jogador;
+import java.awt.Color;
+import java.awt.Graphics2D;
+
+public class Jogador extends Entidade {
+    private int qtd_monstros_mortos;
     
-    private int coord_x;
-    private int coord_y;
-
-    private int velocidade_jogador;
-
     private boolean movimentando_cima = false;
     private boolean movimentando_baixo = false;
     private boolean movimentando_esquerda = false;
     private boolean movimentando_direita = false;
 
-    public Jogador(int largura, int altura, int velocidade) {
-        if(largura <= 0 || altura <= 0) {
-            throw new IllegalArgumentException("A largura e altura do jogador devem ser positivas");
-        }
-        
-        this.largura_jogador = largura;
-        this.altura_jogador = altura;
-        this.velocidade_jogador = velocidade;
+    public Jogador(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial) {
+        super(largura, altura, velocidade, coord_x_inicial, coord_y_inicial);
+
+        this.qtd_monstros_mortos = 0;
     }
 
 
-    public void movimentarJogador(Mapa mapa) {
+    @Override
+    public void movimentar(Mapa mapa) {
+        if(mapa == null) {
+            throw new IllegalArgumentException("A instância de mapa não pode ser nula");
+        }
+
+
         if(this.movimentando_cima) {
-            if(!(mapa.checarColisaoMapa(this.coord_x, (this.coord_y - this.velocidade_jogador)))) {
-                this.coord_y -= this.velocidade_jogador;
+            this.coord_y -= this.velocidade;
+
+            if(mapa.checarColisao(this)) {
+                this.coord_y = mapa.getCoordY();
             }
         }
 
         if(this.movimentando_baixo) {
-            if(!(mapa.checarColisaoMapa(this.coord_x, ((this.coord_y + this.largura_jogador) + this.velocidade_jogador)))) {
-                this.coord_y += this.velocidade_jogador;
+            this.coord_y += this.velocidade;
+
+            if(mapa.checarColisao(this)) {
+                this.coord_y = ((mapa.getCoordY() + mapa.getAltura()) - this.altura);
             }
         }
 
         if(this.movimentando_esquerda) {
-            if(!(mapa.checarColisaoMapa((this.coord_x - this.velocidade_jogador), this.coord_y))) {
-                this.coord_x -= this.velocidade_jogador;
+            this.coord_x -= this.velocidade;
+
+            if(mapa.checarColisao(this)) {
+                this.coord_x = mapa.getCoordX();
             }
         }
 
         if(this.movimentando_direita) {
-            if(!(mapa.checarColisaoMapa(((this.coord_x + this.largura_jogador) + this.velocidade_jogador), this.coord_y))) {
-                this.coord_x += this.velocidade_jogador;
+            this.coord_x += this.velocidade;
+
+            if(mapa.checarColisao(this)) {
+                this.coord_x = ((mapa.getCoordX() + mapa.getLargura()) - this.largura);
             }
         }
     }
-    
 
-    public void setPosicaoInicialJogador(int x_posicao_inicial, int y_posicao_inicial) {
-        this.coord_x = x_posicao_inicial;
-        this.coord_y = y_posicao_inicial;
+
+    public void matarMonstro() {
+        this.qtd_monstros_mortos += 1;
+    }
+
+    public int getMonstrosMortos() {
+        return this.qtd_monstros_mortos;
     }
 
 
-    public int getAlturaJogador() {
-        return this.altura_jogador;
+    public void moverParaCima(boolean pode_mover) {
+        this.movimentando_cima = pode_mover;
     }
 
-    public int getLarguraJogador() {
-        return this.largura_jogador;
+    public void moverParaBaixo(boolean pode_mover) {
+        this.movimentando_baixo = pode_mover;
     }
 
-    public int getCoordXJogador() {
-        return this.coord_x;
+    public void moverParaEsquerda(boolean pode_mover) {
+        this.movimentando_esquerda = pode_mover;
     }
 
-    public int getCoordYJogador() {
-        return this.coord_y;
+    public void moverParaDireita(boolean pode_mover) {
+        this.movimentando_direita = pode_mover;
     }
 
 
-    public void moverParaCima(boolean podeMover) {
-        this.movimentando_cima = podeMover;
-    }
-
-    public void moverParaBaixo(boolean podeMover) {
-        this.movimentando_baixo = podeMover;
-    }
-
-    public void moverParaEsquerda(boolean podeMover) {
-        this.movimentando_esquerda = podeMover;
-    }
-
-    public void moverParaDireita(boolean podeMover) {
-        this.movimentando_direita = podeMover;
+    @Override
+    public void desenhar(Graphics2D g2d) {
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(this.coord_x, this.coord_y, this.largura, this.altura);
     }
 }

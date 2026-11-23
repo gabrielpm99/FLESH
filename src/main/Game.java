@@ -1,28 +1,95 @@
 package main;
 
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.Timer;
+
 import main.mapa.Mapa;
+import main.monstros.Monstro;
 import main.jogador.Jogador;
+
 import gui.PainelJogo;
 
+import input.InputTeclado;
+
+import interfaces.Desenhavel;
+
 public class Game {
-    private final Timer timer_jogo;
-    private PainelJogo painel;
+    public static final int LARGURA_JANELA = 1366;
+    public static final int ALTURA_JANELA = 768;
     
-    public final Mapa mapa = new Mapa(600, 600);
-    public final Jogador jogador = new Jogador(15, 15, 5);
+    public static final int INTERVALO_FRAMES_MS = 16;
+
+    public static final int LARGURA_MAPA = 600;
+    public static final int ALTURA_MAPA = 600;
+
+    public static final int LARGURA_JOGADOR = 15;
+    public static final int ALTURA_JOGADOR = 15;
+    public static final int VELOCIDADE_JOGADOR = 4;
+
+    public static final int LARGURA_MONSTRO = 10;
+    public static final int ALTURA_MONSTRO = 10;
+    public static final int VELOCIDADE_MONSTRO = 3;
+    public static final int DISTANCIA_DE_FUGA = 75;
+    public static final int QUANTIDADE_MONSTROS = 10;
+    public static final int TEMPO_RESPAWN_MONSTROS_MS = 3000;
+
+
+    private final Timer timer_jogo;
+    private final Timer timer_respawn_monstros;
+
+    private PainelJogo painel;
+
+    private final Random randomico = new Random();
+    
+    private final Mapa mapa;
+    private final Jogador jogador;
+
+    private final InputTeclado input_teclado;
+
+    private final List<Monstro> lista_monstros;
+
+    private final List<Desenhavel> lista_elementos_desenhaveis;
+
 
     public Game() {
-        jogador.setPosicaoInicialJogador(((mapa.getCoordXMapa() + mapa.getLarguraMapa()) / 2), 
-                                         ((mapa.getCoordYMapa() + mapa.getAlturaMapa()) / 2));
+        this.mapa = new Mapa(LARGURA_MAPA, ALTURA_MAPA, LARGURA_JANELA, ALTURA_JANELA);
 
-        this.timer_jogo = new Timer(16, new ActionListener() {
+        int x_inicial_jogador = (mapa.getCoordX() + ((mapa.getLargura() - LARGURA_JOGADOR) / 2));
+        int y_inicial_jogador = (mapa.getCoordY() + ((mapa.getAltura() - ALTURA_JOGADOR) / 2));
+
+        this.jogador = new Jogador(LARGURA_JOGADOR, ALTURA_JOGADOR, VELOCIDADE_JOGADOR, x_inicial_jogador, y_inicial_jogador);
+
+        this.lista_elementos_desenhaveis = new ArrayList<>();
+        this.popularListaDesenhaveis();
+
+        this.input_teclado = new InputTeclado(jogador);
+
+
+
+        this.timer_respawn_monstros = new Timer(TEMPO_RESPAWN_MONSTROS_MS, new ActionListener() {
             @Override 
             public void actionPerformed(ActionEvent e) {
-                jogador.movimentarJogador(mapa);
+                gerarMonstros();
+            }
+        });
+
+        this.lista_monstros = new ArrayList<>();
+        this.popularListaMonstros();
+
+
+
+        this.timer_jogo = new Timer(INTERVALO_FRAMES_MS, new ActionListener() {
+            @Override 
+            public void actionPerformed(ActionEvent e) {
+                jogador.movimentar(mapa);
+                gerenciarMonstros();
 
                 atualizarPainel();
             }
@@ -39,15 +106,95 @@ public class Game {
     }
 
 
-    public void setPainelJogo(PainelJogo painel) {
+    private void gerenciarMonstros() {
+        Iterator<Monstro> iterador_monstros = this.lista_monstros.iterator();
+
+        while(iterador_monstros.hasNext()) {
+            Monstro monstro = iterador_monstros.next();
+
+            monstro.fugir(jogador);
+            monstro.movimentar(mapa);
+
+            if(this.jogador.checarColisao(monstro)) {
+                this.jogador.matarMonstro();
+
+                iterador_monstros.remove();
+                this.lista_elementos_desenhaveis.remove(monstro);
+
+                if(!this.timer_respawn_monstros.isRunning()) {
+                    this.timer_respawn_monstros.start();
+                }
+            }
+        }
+    }
+
+    private void gerarMonstros() {
+        if(this.lista_monstros.size() >= QUANTIDADE_MONSTROS) {
+            this.timer_respawn_monstros.stop();
+            return;
+        }
+
+        
+        Monstro monstro;
+            
+        do {
+            int coord_x_aleatoria = (this.mapa.getCoordX() + this.randomico.nextInt(this.mapa.getLargura() - LARGURA_MONSTRO));
+            int coord_y_aleatoria = (this.mapa.getCoordY() + this.randomico.nextInt(this.mapa.getAltura() - ALTURA_MONSTRO));
+
+            monstro = new Monstro(LARGURA_MONSTRO,
+                ALTURA_MONSTRO,
+                VELOCIDADE_MONSTRO,
+                coord_x_aleatoria,
+                coord_y_aleatoria,
+                DISTANCIA_DE_FUGA
+            );
+        } while(this.jogador.checarColisao(monstro));
+
+        this.lista_monstros.add(monstro);
+        this.lista_elementos_desenhaveis.addFirst(monstro);
+    }
+
+    private void popularListaMonstros() {
+        while(this.lista_monstros.size() < QUANTIDADE_MONSTROS) {
+            gerarMonstros();
+        }
+    }
+
+
+    public Mapa getMapa() {
+        return this.mapa;
+    }
+
+    public Jogador getJogador() {
+        return this.jogador;
+    }
+
+    public InputTeclado getInputTeclado() {
+        return this.input_teclado;
+    }
+
+
+    public void setPainel(PainelJogo painel) {
         this.painel = painel;
     }
 
-    public void iniciarJogo() {
+    public void iniciar() {
         this.timer_jogo.start();
     }
 
-    public void pararJogo() {
+    public void parar() {
         this.timer_jogo.stop();
+    }
+
+
+    private void popularListaDesenhaveis() {
+        this.lista_elementos_desenhaveis.add(mapa);
+        this.lista_elementos_desenhaveis.add(jogador);
+    }
+
+    public void desenharElementos(Graphics2D g2d) {
+        for(Desenhavel elemento : this.lista_elementos_desenhaveis) {
+            elemento.desenhar(g2d);
+        }
     }
 }

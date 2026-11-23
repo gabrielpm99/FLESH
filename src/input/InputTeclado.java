@@ -30,23 +30,23 @@ public class InputTeclado implements KeyListener {
     public void keyTyped(KeyEvent e) {}
 
 
-    private void mapearTeclas(int tecla, boolean podeMover) {
+    private void mapearTeclas(int tecla, boolean pode_mover) {
         switch(tecla) {
             case KeyEvent.VK_W:
             case KeyEvent.VK_UP:
-                jogador.moverParaCima(podeMover);
+                jogador.moverParaCima(pode_mover);
                 break;
             case KeyEvent.VK_S:
             case KeyEvent.VK_DOWN:
-                jogador.moverParaBaixo(podeMover);
+                jogador.moverParaBaixo(pode_mover);
                 break;
             case KeyEvent.VK_A:
             case KeyEvent.VK_LEFT:
-                jogador.moverParaEsquerda(podeMover);
+                jogador.moverParaEsquerda(pode_mover);
                 break;
             case KeyEvent.VK_D:
             case KeyEvent.VK_RIGHT:
-                jogador.moverParaDireita(podeMover);
+                jogador.moverParaDireita(pode_mover);
                 break;
             default:
                 break;
