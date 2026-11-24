@@ -9,10 +9,10 @@ import java.awt.Graphics2D;
 public class Jogador extends Entidade {
     private int qtd_monstros_mortos;
     
-    private boolean movimentando_cima = false;
-    private boolean movimentando_baixo = false;
-    private boolean movimentando_esquerda = false;
-    private boolean movimentando_direita = false;
+    private volatile boolean movimentando_cima = false;
+    private volatile boolean movimentando_baixo = false;
+    private volatile boolean movimentando_esquerda = false;
+    private volatile boolean movimentando_direita = false;
 
     public Jogador(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial) {
         super(largura, altura, velocidade, coord_x_inicial, coord_y_inicial);
