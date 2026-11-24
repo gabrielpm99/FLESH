@@ -1,3 +1,6 @@
 *.class
 /out
 /bin
+
+# arquivos cache
+.DS_Store
