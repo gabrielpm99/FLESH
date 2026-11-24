@@ -1,11 +1,13 @@
 package gui;
 
+import config.Argumentos;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.Arrays;
 import javax.swing.JPanel;
-
 import main.Game;
 
 public class PainelJogo extends JPanel {
@@ -33,6 +35,13 @@ public class PainelJogo extends JPanel {
 
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, Game.LARGURA_JANELA, Game.ALTURA_JANELA);
+        
+        
+        if (Arrays.asList(Argumentos.obter()).contains("--debug")) {
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(new Font("Arial", Font.PLAIN, 32));
+            g2d.drawString(String.format("SPEED = %.2f", game.getPxPortick()), 50, 50);
+        }
 
         game.desenharElementos(g2d);
     }
