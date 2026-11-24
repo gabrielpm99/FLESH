@@ -1,5 +1,8 @@
 package main;
 
+import gui.PainelJogo;
+import input.InputTeclado;
+import interfaces.Desenhavel;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,18 +10,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
 import javax.swing.Timer;
-
+import main.jogador.Jogador;
 import main.mapa.Mapa;
 import main.monstros.Monstro;
-import main.jogador.Jogador;
-
-import gui.PainelJogo;
-
-import input.InputTeclado;
-
-import interfaces.Desenhavel;
 
 public class Game {
     public static final int LARGURA_JANELA = 1366;
@@ -39,6 +34,8 @@ public class Game {
     public static final int DISTANCIA_DE_FUGA = 75;
     public static final int QUANTIDADE_MONSTROS = 10;
     public static final int TEMPO_RESPAWN_MONSTROS_MS = 3000;
+
+    private double px_por_tick;
 
 
     private final Timer timer_jogo;
@@ -88,7 +85,16 @@ public class Game {
         this.timer_jogo = new Timer(INTERVALO_FRAMES_MS, new ActionListener() {
             @Override 
             public void actionPerformed(ActionEvent e) {
+                int x_antes = jogador.getCoordX();
+                int y_antes = jogador.getCoordY();
+
                 jogador.movimentar(mapa);
+
+                int dx = jogador.getCoordX() - x_antes;
+                int dy = jogador.getCoordY() - y_antes;
+
+                px_por_tick = Math.sqrt(dx * dx + dy * dy);
+
                 gerenciarMonstros();
 
                 atualizarPainel();
@@ -203,5 +209,9 @@ public class Game {
         for(Desenhavel elemento : this.lista_elementos_desenhaveis) {
             elemento.desenhar(g2d);
         }
+    }
+
+    public double getPxPortick() {
+        return this.px_por_tick;
     }
 }
