@@ -47,12 +47,12 @@ public class Game {
     
     private final Mapa mapa;
     private final Jogador jogador;
-
     private final InputTeclado input_teclado;
 
     private final List<Monstro> lista_monstros;
-
     private final List<Desenhavel> lista_elementos_desenhaveis;
+
+    private int qtd_monstros_mortos;
 
 
     public Game() {
@@ -122,7 +122,7 @@ public class Game {
             monstro.movimentar(mapa);
 
             if(this.jogador.checarColisao(monstro)) {
-                this.jogador.matarMonstro();
+                matarMonstro();
 
                 iterador_monstros.remove();
                 this.lista_elementos_desenhaveis.remove(monstro);
@@ -162,6 +162,10 @@ public class Game {
         while(this.lista_monstros.size() < QUANTIDADE_MONSTROS) {
             gerarMonstros();
         }
+    }
+
+    private void matarMonstro() {
+        this.qtd_monstros_mortos++;
     }
 
 

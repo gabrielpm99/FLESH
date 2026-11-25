@@ -7,8 +7,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class Jogador extends Entidade {
-    private int qtd_monstros_mortos;
-    
     private boolean movimentando_cima = false;
     private boolean movimentando_baixo = false;
     private boolean movimentando_esquerda = false;
@@ -16,8 +14,6 @@ public class Jogador extends Entidade {
 
     public Jogador(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial) {
         super(largura, altura, velocidade, coord_x_inicial, coord_y_inicial);
-
-        this.qtd_monstros_mortos = 0;
     }
 
 
@@ -59,15 +55,6 @@ public class Jogador extends Entidade {
                 this.coord_x = ((mapa.getCoordX() + mapa.getLargura()) - this.largura);
             }
         }
-    }
-
-
-    public void matarMonstro() {
-        this.qtd_monstros_mortos += 1;
-    }
-
-    public int getMonstrosMortos() {
-        return this.qtd_monstros_mortos;
     }
 
 
