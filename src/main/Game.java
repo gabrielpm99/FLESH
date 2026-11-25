@@ -22,12 +22,12 @@ public class Game {
     public static final int LARGURA_MAPA = 600;
     public static final int ALTURA_MAPA = 600;
 
-    public static final int LARGURA_JOGADOR = 15;
-    public static final int ALTURA_JOGADOR = 15;
+    public static final int LARGURA_JOGADOR = 16;
+    public static final int ALTURA_JOGADOR = 16;
     public static final int VELOCIDADE_JOGADOR = 4;
 
-    public static final int LARGURA_MONSTRO = 15;
-    public static final int ALTURA_MONSTRO = 15;
+    public static final int LARGURA_MONSTRO = 16;
+    public static final int ALTURA_MONSTRO = 16;
     public static final int VELOCIDADE_MONSTRO = 1;
     public static final int DISTANCIA_DE_FUGA = 75;
     public static final int QUANTIDADE_MONSTROS = 5;
