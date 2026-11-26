@@ -23,7 +23,6 @@ public class Jogador extends Entidade {
             throw new IllegalArgumentException("A instância de mapa não pode ser nula");
         }
 
-
         boolean movimentando_vertical = (this.movimentando_cima || this.movimentando_baixo);
         boolean movimentando_horizontal = (this.movimentando_esquerda || this.movimentando_direita);
 
@@ -31,7 +30,6 @@ public class Jogador extends Entidade {
         if(movimentando_vertical && movimentando_horizontal) {
             passo_movimento = (int) Math.round(this.velocidade / Math.sqrt(2));
         }
-
 
         if(this.movimentando_cima) {
             this.coord_y -= passo_movimento;
@@ -86,6 +84,10 @@ public class Jogador extends Entidade {
 
     @Override
     public void desenhar(Graphics2D g2d) {
+        if(g2d == null) {
+            throw new IllegalArgumentException("A instância de g2d não pode ser nula");
+        }
+
         g2d.setColor(Color.BLUE);
         g2d.fillRect(this.coord_x, this.coord_y, this.largura, this.altura);
     }

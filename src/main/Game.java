@@ -11,6 +11,7 @@ import java.util.Random;
 import main.jogador.Jogador;
 import main.mapa.Mapa;
 import main.monstros.Monstro;
+import main.serras.Serra;
 
 public class Game {
     public static final int LARGURA_JANELA = 1366;
@@ -35,6 +36,10 @@ public class Game {
     public static final int TEMPO_RESPAWN_MONSTROS_MS = 3000;
     private static final long TEMPO_RESPAWN_NANOS = TEMPO_RESPAWN_MONSTROS_MS * NANOS_POR_MS;
 
+    public static final int LARGURA_SERRA = 32;
+    public static final int ALTURA_SERRA = 32;
+    public static final int VELOCIDADE_SERRA = 5;
+
     private volatile double px_por_tick;
     private volatile boolean jogo_rodando = false;
     private Thread thread_jogo;
@@ -49,6 +54,7 @@ public class Game {
     private final InputTeclado input_teclado;
 
     private final List<Monstro> lista_monstros;
+    private final List<Serra> lista_serras;
     private final List<Desenhavel> lista_elementos_desenhaveis;
 
     private int qtd_monstros_mortos;
@@ -69,6 +75,9 @@ public class Game {
 
         this.lista_monstros = new ArrayList<>();
         this.popularListaMonstros();
+
+        this.lista_serras = new ArrayList<>();
+        gerarSerras();
     }
 
 
@@ -106,18 +115,12 @@ public class Game {
     }
 
     private void atualizarEstadosJogo() {
-        int x_antes_movimento = jogador.getCoordX();
-        int y_antes_movimento = jogador.getCoordY();
-
         jogador.movimentar(mapa);
-
-        int variacao_coord_x = jogador.getCoordX() - x_antes_movimento;
-        int variacao_coord_y = jogador.getCoordY() - y_antes_movimento;
-
-        px_por_tick = Math.sqrt((variacao_coord_x * variacao_coord_x) + (variacao_coord_y * variacao_coord_y));
 
         gerenciarMonstros();
         gerenciarRespawn();
+
+        gerenciarSerras();
     }
 
     private void gerenciarRespawn() {
@@ -191,6 +194,51 @@ public class Game {
 
     private void matarMonstro() {
         this.qtd_monstros_mortos++;
+    }
+
+
+    private void gerarSerras() {
+        Serra serra;
+            
+        int coord_x_aleatoria;
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - ALTURA_SERRA) - 1)));
+
+        if(this.randomico.nextBoolean()) {
+            coord_x_aleatoria = this.mapa.getCoordX();
+        } else {
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - LARGURA_SERRA);
+        }
+        
+        serra = new Serra(LARGURA_SERRA,
+            ALTURA_SERRA,
+            VELOCIDADE_SERRA,
+            coord_x_aleatoria,
+            coord_y_aleatoria,
+            this.randomico.nextBoolean() ? 1 : -1
+        );
+
+        this.lista_serras.add(serra);
+        synchronized (this.lista_elementos_desenhaveis) {
+            this.lista_elementos_desenhaveis.add(serra);
+        }
+    }
+
+    private void gerenciarSerras() {
+        Iterator<Serra> iterador_serras = this.lista_serras.iterator();
+
+        while(iterador_serras.hasNext()) {
+            Serra serra = iterador_serras.next();
+
+            serra.movimentar(mapa);
+
+            if(this.jogador.checarColisao(serra)) {
+                matarJogador();
+            }
+        }
+    }
+
+    void matarJogador() {
+        this.parar();
     }
 
 

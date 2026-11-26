@@ -86,7 +86,6 @@ public class Monstro extends Entidade {
             throw new IllegalArgumentException("A instância de jogador não pode ser nula");
         }
 
-
         int distancia_eixo_x = Math.abs(this.coord_x - jogador.getCoordX());
         int distancia_eixo_y = Math.abs(this.coord_y - jogador.getCoordY());
 
@@ -115,6 +114,10 @@ public class Monstro extends Entidade {
 
     @Override
     public void desenhar(Graphics2D g2d) {
+        if(g2d == null) {
+            throw new IllegalArgumentException("A instância de g2d não pode ser nula");
+        }
+        
         g2d.setColor(Color.RED);
         g2d.fillRect(this.coord_x, this.coord_y, this.largura, this.altura);
     }
