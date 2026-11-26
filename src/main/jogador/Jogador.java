@@ -7,10 +7,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class Jogador extends Entidade {
-    private boolean movimentando_cima = false;
-    private boolean movimentando_baixo = false;
-    private boolean movimentando_esquerda = false;
-    private boolean movimentando_direita = false;
+    private volatile boolean movimentando_cima = false;
+    private volatile boolean movimentando_baixo = false;
+    private volatile boolean movimentando_esquerda = false;
+    private volatile boolean movimentando_direita = false;
 
     public Jogador(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial) {
         super(largura, altura, velocidade, coord_x_inicial, coord_y_inicial);
@@ -24,8 +24,17 @@ public class Jogador extends Entidade {
         }
 
 
+        boolean movimentando_vertical = (this.movimentando_cima || this.movimentando_baixo);
+        boolean movimentando_horizontal = (this.movimentando_esquerda || this.movimentando_direita);
+
+        int passo_movimento = this.velocidade;
+        if(movimentando_vertical && movimentando_horizontal) {
+            passo_movimento = (int) Math.round(this.velocidade / Math.sqrt(2));
+        }
+
+
         if(this.movimentando_cima) {
-            this.coord_y -= this.velocidade;
+            this.coord_y -= passo_movimento;
 
             if(mapa.checarColisao(this)) {
                 this.coord_y = mapa.getCoordY();
@@ -33,7 +42,7 @@ public class Jogador extends Entidade {
         }
 
         if(this.movimentando_baixo) {
-            this.coord_y += this.velocidade;
+            this.coord_y += passo_movimento;
 
             if(mapa.checarColisao(this)) {
                 this.coord_y = ((mapa.getCoordY() + mapa.getAltura()) - this.altura);
@@ -41,7 +50,7 @@ public class Jogador extends Entidade {
         }
 
         if(this.movimentando_esquerda) {
-            this.coord_x -= this.velocidade;
+            this.coord_x -= passo_movimento;
 
             if(mapa.checarColisao(this)) {
                 this.coord_x = mapa.getCoordX();
@@ -49,7 +58,7 @@ public class Jogador extends Entidade {
         }
 
         if(this.movimentando_direita) {
-            this.coord_x += this.velocidade;
+            this.coord_x += passo_movimento;
 
             if(mapa.checarColisao(this)) {
                 this.coord_x = ((mapa.getCoordX() + mapa.getLargura()) - this.largura);
