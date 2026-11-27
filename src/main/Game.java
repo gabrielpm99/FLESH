@@ -5,7 +5,6 @@ import input.InputTeclado;
 import interfaces.Desenhavel;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import main.jogador.Jogador;
@@ -30,8 +29,12 @@ public class Game {
     public static final int QUANTIDADE_MONSTROS = 5;
 
     private volatile double px_por_tick;
-    private volatile boolean jogo_rodando = false;
+    private volatile boolean jogo_rodando;
+    private volatile boolean comecou_partida;
     private Thread thread_jogo;
+
+    int x_inicial_jogador;
+    int y_inicial_jogador;
 
     private PainelJogo painel;
 
@@ -50,10 +53,13 @@ public class Game {
     private final List<Desenhavel> lista_elementos_desenhaveis;
 
     public Game() {
+        this.jogo_rodando = false;
+        this.comecou_partida = false;
+
         this.mapa = new MapaBasico(LARGURA_JANELA, ALTURA_JANELA);
 
-        int x_inicial_jogador = (mapa.getCoordX() + ((mapa.getLargura() - JogadorBasico.LARGURA_JOGADOR) / 2));
-        int y_inicial_jogador = (mapa.getCoordY() + ((mapa.getAltura() - JogadorBasico.ALTURA_JOGADOR) / 2));
+        x_inicial_jogador = (mapa.getCoordX() + ((mapa.getLargura() - JogadorBasico.LARGURA_JOGADOR) / 2));
+        y_inicial_jogador = (mapa.getCoordY() + ((mapa.getAltura() - JogadorBasico.ALTURA_JOGADOR) / 2));
 
         this.jogador = new JogadorBasico(x_inicial_jogador, y_inicial_jogador);
 
@@ -107,7 +113,15 @@ public class Game {
     }
 
     private void atualizarEstadosJogo() {
-        jogador.movimentar(mapa);
+        this.jogador.movimentar(this.mapa);
+
+        if(!this.comecou_partida) {
+            if(this.x_inicial_jogador == this.jogador.getCoordX() && this.y_inicial_jogador == this.jogador.getCoordY()) {
+                return;
+            }
+
+            this.comecou_partida = true;
+        }
 
         gerenciarMonstros();
         gerenciarRespawn();

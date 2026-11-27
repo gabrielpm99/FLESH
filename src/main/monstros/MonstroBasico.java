@@ -1,7 +1,5 @@
 package main.monstros;
 
-import main.Game;
-
 public class MonstroBasico extends Monstro {
     public static final int DIAMETRO_MONSTRO = 24;
     public static final int ALTURA_MONSTRO = DIAMETRO_MONSTRO;
