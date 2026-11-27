@@ -6,7 +6,7 @@ import main.mapa.Mapa;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class Jogador extends Entidade {
+public abstract class Jogador extends Entidade {
     private volatile boolean movimentando_cima = false;
     private volatile boolean movimentando_baixo = false;
     private volatile boolean movimentando_esquerda = false;
@@ -34,7 +34,7 @@ public class Jogador extends Entidade {
         if(this.movimentando_cima) {
             this.coord_y -= passo_movimento;
 
-            if(mapa.checarColisao(this)) {
+            if(mapa.checarColisaoRetangulo(this)) {
                 this.coord_y = mapa.getCoordY();
             }
         }
@@ -42,7 +42,7 @@ public class Jogador extends Entidade {
         if(this.movimentando_baixo) {
             this.coord_y += passo_movimento;
 
-            if(mapa.checarColisao(this)) {
+            if(mapa.checarColisaoRetangulo(this)) {
                 this.coord_y = ((mapa.getCoordY() + mapa.getAltura()) - this.altura);
             }
         }
@@ -50,7 +50,7 @@ public class Jogador extends Entidade {
         if(this.movimentando_esquerda) {
             this.coord_x -= passo_movimento;
 
-            if(mapa.checarColisao(this)) {
+            if(mapa.checarColisaoRetangulo(this)) {
                 this.coord_x = mapa.getCoordX();
             }
         }
@@ -58,7 +58,7 @@ public class Jogador extends Entidade {
         if(this.movimentando_direita) {
             this.coord_x += passo_movimento;
 
-            if(mapa.checarColisao(this)) {
+            if(mapa.checarColisaoRetangulo(this)) {
                 this.coord_x = ((mapa.getCoordX() + mapa.getLargura()) - this.largura);
             }
         }
@@ -89,6 +89,6 @@ public class Jogador extends Entidade {
         }
 
         g2d.setColor(Color.BLUE);
-        g2d.fillRect(this.coord_x, this.coord_y, this.largura, this.altura);
+        g2d.fillOval(this.coord_x, this.coord_y, this.largura, this.altura);
     }
 }

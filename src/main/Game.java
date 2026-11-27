@@ -9,41 +9,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import main.jogador.Jogador;
+import main.jogador.JogadorBasico;
 import main.mapa.Mapa;
+import main.mapa.MapaBasico;
 import main.monstros.Monstro;
+import main.monstros.MonstroBasico;
+import main.regras.Consumo;
+import main.regras.Fome;
 import main.serras.Serra;
+import main.serras.SerraPrimeira;
 
 public class Game {
     public static final int LARGURA_JANELA = 1366;
     public static final int ALTURA_JANELA = 768;
 
-    public static final int FPS_ALVO = 60;
+    private static final int FPS_ALVO = 60;
     private static final long NANOS_POR_MS = 1_000_000L;
     private static final double NANOS_POR_TICK = 1_000_000_000.0 / FPS_ALVO;
 
-    public static final int LARGURA_MAPA = 600;
-    public static final int ALTURA_MAPA = 600;
-
-    public static final int LARGURA_JOGADOR = 16;
-    public static final int ALTURA_JOGADOR = 16;
-    public static final int VELOCIDADE_JOGADOR = 4;
-
-    public static final int LARGURA_MONSTRO = 16;
-    public static final int ALTURA_MONSTRO = 16;
-    public static final int VELOCIDADE_MONSTRO = 1;
-    public static final int DISTANCIA_DE_FUGA = 75;
     public static final int QUANTIDADE_MONSTROS = 5;
-    public static final int TEMPO_RESPAWN_MONSTROS_MS = 3000;
-    private static final long TEMPO_RESPAWN_NANOS = TEMPO_RESPAWN_MONSTROS_MS * NANOS_POR_MS;
-
-    public static final int LARGURA_SERRA = 32;
-    public static final int ALTURA_SERRA = 32;
-    public static final int VELOCIDADE_SERRA = 5;
 
     private volatile double px_por_tick;
     private volatile boolean jogo_rodando = false;
     private Thread thread_jogo;
-    private long tempo_respawn_decorrido_nanos = 0;
 
     private PainelJogo painel;
 
@@ -52,21 +40,25 @@ public class Game {
     private final Mapa mapa;
     private final Jogador jogador;
     private final InputTeclado input_teclado;
+    private final Consumo consumo;
+    private final Fome fome;
 
     private final List<Monstro> lista_monstros;
+
     private final List<Serra> lista_serras;
+
     private final List<Desenhavel> lista_elementos_desenhaveis;
 
-    private int qtd_monstros_mortos;
-
-
     public Game() {
-        this.mapa = new Mapa(LARGURA_MAPA, ALTURA_MAPA, LARGURA_JANELA, ALTURA_JANELA);
+        this.mapa = new MapaBasico(LARGURA_JANELA, ALTURA_JANELA);
 
-        int x_inicial_jogador = (mapa.getCoordX() + ((mapa.getLargura() - LARGURA_JOGADOR) / 2));
-        int y_inicial_jogador = (mapa.getCoordY() + ((mapa.getAltura() - ALTURA_JOGADOR) / 2));
+        int x_inicial_jogador = (mapa.getCoordX() + ((mapa.getLargura() - JogadorBasico.LARGURA_JOGADOR) / 2));
+        int y_inicial_jogador = (mapa.getCoordY() + ((mapa.getAltura() - JogadorBasico.ALTURA_JOGADOR) / 2));
 
-        this.jogador = new Jogador(LARGURA_JOGADOR, ALTURA_JOGADOR, VELOCIDADE_JOGADOR, x_inicial_jogador, y_inicial_jogador);
+        this.jogador = new JogadorBasico(x_inicial_jogador, y_inicial_jogador);
+
+        this.consumo = new Consumo();
+        this.fome = new Fome();
 
         this.lista_elementos_desenhaveis = new ArrayList<>();
         this.popularListaDesenhaveis();
@@ -77,7 +69,7 @@ public class Game {
         this.popularListaMonstros();
 
         this.lista_serras = new ArrayList<>();
-        gerarSerras();
+        this.gerarSerras();
     }
 
 
@@ -119,20 +111,33 @@ public class Game {
 
         gerenciarMonstros();
         gerenciarRespawn();
-
         gerenciarSerras();
+        gerenciarFome();
+    }
+
+    private void gerenciarFome() {
+        this.fome.addTempoFomeDecorridoNanos((long) NANOS_POR_TICK);
+
+        long tempo_morte_fome_nanos = Fome.TEMPO_MORTE_FOME_MS * NANOS_POR_MS;
+
+        if(this.fome.getTempoFomeDecorridoNanos() >= tempo_morte_fome_nanos) {
+            matarJogador();
+        }
     }
 
     private void gerenciarRespawn() {
-        if (this.lista_monstros.size() < QUANTIDADE_MONSTROS) {
-            this.tempo_respawn_decorrido_nanos += (long) NANOS_POR_TICK;
+        long tempo_respawn_nanos = MonstroBasico.TEMPO_RESPAWN_MONSTROS_MS * NANOS_POR_MS;
 
-            if (this.tempo_respawn_decorrido_nanos >= TEMPO_RESPAWN_NANOS) {
-                gerarMonstros();
-                this.tempo_respawn_decorrido_nanos = 0;
+        for(Monstro monstro : this.lista_monstros) {
+            if(monstro.getEstaVivo()) {
+                continue;
             }
-        } else {
-            this.tempo_respawn_decorrido_nanos = 0;
+
+            monstro.addTempoRespawnDecorridoNanos((long) NANOS_POR_TICK);
+
+            if(monstro.getTempoRespawnDecorridoNanos() >= tempo_respawn_nanos) {
+                nascerMonstro(monstro);
+            }
         }
     }
 
@@ -145,45 +150,40 @@ public class Game {
     }
 
     private void gerenciarMonstros() {
-        Iterator<Monstro> iterador_monstros = this.lista_monstros.iterator();
-
-        while(iterador_monstros.hasNext()) {
-            Monstro monstro = iterador_monstros.next();
+        for(Monstro monstro : this.lista_monstros) {
+            if(!monstro.getEstaVivo()) {
+                continue;
+            }
 
             monstro.fugir(jogador);
             monstro.movimentar(mapa);
+            if(monstro.checarColisaoCirculos(monstro, this.jogador)) {
+                consumirMonstro();
 
-            if(this.jogador.checarColisao(monstro)) {
-                matarMonstro();
-
-                iterador_monstros.remove();
-                synchronized (this.lista_elementos_desenhaveis) {
-                    this.lista_elementos_desenhaveis.remove(monstro);
-                }
+                monstro.morrer();
             }
         }
     }
 
     private void gerarMonstros() {
-        Monstro monstro;
-            
-        do {
-            int coord_x_aleatoria = (this.mapa.getCoordX() + this.randomico.nextInt(this.mapa.getLargura() - LARGURA_MONSTRO));
-            int coord_y_aleatoria = (this.mapa.getCoordY() + this.randomico.nextInt(this.mapa.getAltura() - ALTURA_MONSTRO));
-
-            monstro = new Monstro(LARGURA_MONSTRO,
-                ALTURA_MONSTRO,
-                VELOCIDADE_MONSTRO,
-                coord_x_aleatoria,
-                coord_y_aleatoria,
-                DISTANCIA_DE_FUGA
-            );
-        } while(this.jogador.checarColisao(monstro));
+        Monstro monstro = new MonstroBasico(0, 0);
+        
+        nascerMonstro(monstro);
 
         this.lista_monstros.add(monstro);
         synchronized (this.lista_elementos_desenhaveis) {
             this.lista_elementos_desenhaveis.addFirst(monstro);
         }
+    }
+
+    private void nascerMonstro(Monstro monstro) {
+        do {
+            int coord_x_aleatoria = (this.mapa.getCoordX() + this.randomico.nextInt(this.mapa.getLargura() - MonstroBasico.LARGURA_MONSTRO));
+            int coord_y_aleatoria = (this.mapa.getCoordY() + this.randomico.nextInt(this.mapa.getAltura() - MonstroBasico.ALTURA_MONSTRO));
+
+            monstro.nascer(coord_x_aleatoria, coord_y_aleatoria);
+
+        } while(monstro.checarColisaoCirculos(monstro, this.jogador));
     }
 
     private void popularListaMonstros() {
@@ -192,31 +192,28 @@ public class Game {
         }
     }
 
-    private void matarMonstro() {
-        this.qtd_monstros_mortos++;
+    private void consumirMonstro() {
+        this.consumo.consumir();
+        this.fome.saciarFome();
     }
-
 
     private void gerarSerras() {
         Serra serra;
-            
+        
+        do {
         int coord_x_aleatoria;
-        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - ALTURA_SERRA) - 1)));
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraPrimeira.ALTURA_SERRA) - 1)));
 
         if(this.randomico.nextBoolean()) {
             coord_x_aleatoria = this.mapa.getCoordX();
         } else {
-            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - LARGURA_SERRA);
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraPrimeira.LARGURA_SERRA);
         }
         
-        serra = new Serra(LARGURA_SERRA,
-            ALTURA_SERRA,
-            VELOCIDADE_SERRA,
-            coord_x_aleatoria,
-            coord_y_aleatoria,
-            this.randomico.nextBoolean() ? 1 : -1
-        );
+        serra = new SerraPrimeira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
 
+        } while(serra.checarColisaoCirculos(serra, this.jogador));
+        
         this.lista_serras.add(serra);
         synchronized (this.lista_elementos_desenhaveis) {
             this.lista_elementos_desenhaveis.add(serra);
@@ -224,14 +221,10 @@ public class Game {
     }
 
     private void gerenciarSerras() {
-        Iterator<Serra> iterador_serras = this.lista_serras.iterator();
-
-        while(iterador_serras.hasNext()) {
-            Serra serra = iterador_serras.next();
-
+        for(Serra serra : lista_serras) {
             serra.movimentar(mapa);
 
-            if(this.jogador.checarColisao(serra)) {
+            if(serra.checarColisaoCirculos(serra, this.jogador)) {
                 matarJogador();
             }
         }
@@ -278,8 +271,9 @@ public class Game {
     }
 
 
+
     private void popularListaDesenhaveis() {
-        this.lista_elementos_desenhaveis.add(mapa);
+        this.lista_elementos_desenhaveis.addFirst(mapa);
         this.lista_elementos_desenhaveis.add(jogador);
     }
 

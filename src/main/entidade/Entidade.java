@@ -1,6 +1,7 @@
 package main.entidade;
 
-import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 
 import main.mapa.Mapa;
 
@@ -36,8 +37,8 @@ public abstract class Entidade implements Colidivel, Desenhavel {
     public abstract void movimentar(Mapa mapa);
 
     @Override
-    public Rectangle getArea() {
-        return new Rectangle(this.coord_x, this.coord_y, this.largura, this.altura);
+    public Shape getArea() {
+        return new Ellipse2D.Double(this.coord_x, this.coord_y, this.largura, this.altura);
     }
 
     public int getAltura() {
@@ -46,6 +47,14 @@ public abstract class Entidade implements Colidivel, Desenhavel {
 
     public int getLargura() {
         return this.largura;
+    }
+
+    public int getCoordXCentro() {
+        return this.coord_x + (this.largura / 2);
+    }
+
+    public int getCoordYCentro() {
+        return this.coord_y + (this.altura / 2);
     }
 
     public int getCoordX() {

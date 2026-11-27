@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import main.entidade.Entidade;
 import main.mapa.Mapa;
 
-public class Serra extends Entidade {
+public abstract class Serra extends Entidade {
     private int direcao_eixo_x;
     private int direcao_eixo_y;
 
@@ -26,13 +26,13 @@ public class Serra extends Entidade {
         }
 
         this.coord_x += (this.velocidade * this.direcao_eixo_x);
-        if(mapa.checarColisao(this)) {
+        if(mapa.checarColisaoRetangulo(this)) {
             this.direcao_eixo_x *= -1;
             this.coord_x += (this.velocidade * this.direcao_eixo_x);
         }
 
         this.coord_y += (this.velocidade * this.direcao_eixo_y);
-        if(mapa.checarColisao(this)) {
+        if(mapa.checarColisaoRetangulo(this)) {
             this.direcao_eixo_y *= -1;
             this.coord_y += (this.velocidade * this.direcao_eixo_y);
         }
