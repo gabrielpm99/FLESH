@@ -11,6 +11,7 @@ import java.util.Random;
 import main.jogador.Jogador;
 import main.mapa.Mapa;
 import main.monstros.Monstro;
+import main.serras.Serra;
 
 public class Game {
     public static final int LARGURA_JANELA = 1366;
@@ -22,17 +23,26 @@ public class Game {
     public static final int LARGURA_MAPA = 600;
     public static final int ALTURA_MAPA = 600;
 
-    public static final int LARGURA_JOGADOR = 16;
-    public static final int ALTURA_JOGADOR = 16;
+    public static final int DIAMETRO_JOGADOR = 16;
+    public static final int ALTURA_JOGADOR = DIAMETRO_JOGADOR;
+    public static final int LARGURA_JOGADOR = DIAMETRO_JOGADOR;
     public static final int VELOCIDADE_JOGADOR = 4;
 
-    public static final int LARGURA_MONSTRO = 16;
-    public static final int ALTURA_MONSTRO = 16;
+    
+    public static final int DIAMETRO_MONSTRO = 24;
+    public static final int ALTURA_MONSTRO = DIAMETRO_MONSTRO;
+    public static final int LARGURA_MONSTRO = DIAMETRO_MONSTRO;
     public static final int VELOCIDADE_MONSTRO = 1;
     public static final int DISTANCIA_DE_FUGA = 75;
     public static final int QUANTIDADE_MONSTROS = 5;
     public static final int TEMPO_RESPAWN_MONSTROS_MS = 3000;
-    private static final long TEMPO_RESPAWN_NANOS = TEMPO_RESPAWN_MONSTROS_MS * 1_000_000L;
+    private static final long NANOS_POR_MS = 1000000;
+    private static final long TEMPO_RESPAWN_NANOS = TEMPO_RESPAWN_MONSTROS_MS * NANOS_POR_MS;
+
+    public static final int DIAMETRO_SERRA = 192;
+    public static final int ALTURA_SERRA = DIAMETRO_SERRA;
+    public static final int LARGURA_SERRA = DIAMETRO_SERRA;
+    public static final int VELOCIDADE_SERRA = 3;
 
     private volatile double px_por_tick;
     private volatile boolean rodando = false;
@@ -49,8 +59,11 @@ public class Game {
     private final InputTeclado input_teclado;
 
     private final List<Monstro> lista_monstros;
-    private final List<Desenhavel> lista_elementos_desenhaveis;
+    private int qtd_monstros_mortos = 0;
 
+    private final List<Serra> lista_serras;
+
+    private final List<Desenhavel> lista_elementos_desenhaveis;
 
     public Game() {
         this.mapa = new Mapa(LARGURA_MAPA, ALTURA_MAPA, LARGURA_JANELA, ALTURA_JANELA);
@@ -67,6 +80,9 @@ public class Game {
 
         this.lista_monstros = new ArrayList<>();
         this.popularListaMonstros();
+
+        this.lista_serras = new ArrayList<>();
+        this.gerarSerras();
     }
 
 
@@ -116,6 +132,7 @@ public class Game {
 
         gerenciarMonstros();
         gerenciarRespawn();
+        gerenciarSerras();
     }
 
     private void gerenciarRespawn() {
@@ -147,10 +164,8 @@ public class Game {
 
             monstro.fugir(jogador);
             monstro.movimentar(mapa);
-
-            if(this.jogador.checarColisao(monstro)) {
-                this.jogador.matarMonstro();
-
+            if(monstro.checarColisaoCirculos(monstro, this.jogador)) {
+                matarMonstro();
                 iterador_monstros.remove();
                 synchronized (this.lista_elementos_desenhaveis) {
                     this.lista_elementos_desenhaveis.remove(monstro);
@@ -173,7 +188,7 @@ public class Game {
                 coord_y_aleatoria,
                 DISTANCIA_DE_FUGA
             );
-        } while(this.jogador.checarColisao(monstro));
+        } while(monstro.checarColisaoCirculos(monstro, this.jogador));
 
         this.lista_monstros.add(monstro);
         synchronized (this.lista_elementos_desenhaveis) {
@@ -185,6 +200,57 @@ public class Game {
         while(this.lista_monstros.size() < QUANTIDADE_MONSTROS) {
             gerarMonstros();
         }
+    }
+
+    private void matarMonstro() {
+        this.qtd_monstros_mortos++;
+    }
+
+
+    private void gerarSerras() {
+        Serra serra;
+        
+        do {
+        int coord_x_aleatoria;
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - ALTURA_SERRA) - 1)));
+
+        if(this.randomico.nextBoolean()) {
+            coord_x_aleatoria = this.mapa.getCoordX();
+        } else {
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - LARGURA_SERRA);
+        }
+        
+        serra = new Serra(LARGURA_SERRA,
+            ALTURA_SERRA,
+            VELOCIDADE_SERRA,
+            coord_x_aleatoria,
+            coord_y_aleatoria,
+            this.randomico.nextBoolean() ? 1 : -1
+        );
+        } while(serra.checarColisaoCirculos(serra, this.jogador));
+        
+        this.lista_serras.add(serra);
+        synchronized (this.lista_elementos_desenhaveis) {
+            this.lista_elementos_desenhaveis.add(serra);
+        }
+    }
+
+    private void gerenciarSerras() {
+        Iterator<Serra> iterador_serras = this.lista_serras.iterator();
+
+        while(iterador_serras.hasNext()) {
+            Serra serra = iterador_serras.next();
+
+            serra.movimentar(mapa);
+
+            if(serra.checarColisaoCirculos(serra, this.jogador)) {
+                matarJogador();
+            }
+        }
+    }
+
+    void matarJogador() {
+        this.parar();
     }
 
 
@@ -224,8 +290,9 @@ public class Game {
     }
 
 
+
     private void popularListaDesenhaveis() {
-        this.lista_elementos_desenhaveis.add(mapa);
+        this.lista_elementos_desenhaveis.addFirst(mapa);
         this.lista_elementos_desenhaveis.add(jogador);
     }
 

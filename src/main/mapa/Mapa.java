@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 import interfaces.Colidivel;
 import interfaces.Desenhavel;
+import main.entidade.Entidade;
 
 public class Mapa implements Colidivel, Desenhavel {
     private final int largura;
@@ -31,12 +32,12 @@ public class Mapa implements Colidivel, Desenhavel {
 
 
     @Override
-    public boolean checarColisao(Colidivel entidade) {
+    public boolean checarColisaoRetangulo(Entidade entidade) {
         if(entidade == null) {
             throw new IllegalArgumentException("A entidade colidível não pode ser nula");
         }
 
-        return !((this.getArea()).contains(entidade.getArea()));
+        return !((this.getArea()).contains(entidade.getCoordX(), entidade.getCoordY(), entidade.getLargura(), entidade.getAltura()));
     }
 
 

@@ -52,7 +52,7 @@ public class Monstro extends Entidade {
 
 
         this.coord_x += this.direcao_eixo_x * this.velocidade;
-        if(mapa.checarColisao(this)) {
+        if(mapa.checarColisaoRetangulo(this)) {
             this.coord_x -= this.direcao_eixo_x * this.velocidade;
             
             if(!this.esta_fugindo) {
@@ -61,7 +61,7 @@ public class Monstro extends Entidade {
         }
 
         this.coord_y += this.direcao_eixo_y * this.velocidade;
-        if(mapa.checarColisao(this)) {
+        if(mapa.checarColisaoRetangulo(this)) {
             this.coord_y -= this.direcao_eixo_y * this.velocidade;
             
             if(!this.esta_fugindo) {
@@ -116,6 +116,6 @@ public class Monstro extends Entidade {
     @Override
     public void desenhar(Graphics2D g2d) {
         g2d.setColor(Color.RED);
-        g2d.fillRect(this.coord_x, this.coord_y, this.largura, this.altura);
+        g2d.fillOval(this.coord_x, this.coord_y, this.largura, this.altura);
     }
 }
