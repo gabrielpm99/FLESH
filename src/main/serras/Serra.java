@@ -44,7 +44,7 @@ public abstract class Serra extends Entidade {
             throw new IllegalArgumentException("A instância de g2d não pode ser nula");
         }
         
-        g2d.setColor(Color.GREEN);
+        g2d.setColor(Color.BLACK);
         g2d.fillOval(this.coord_x, this.coord_y, this.largura, this.altura);
     }
 }

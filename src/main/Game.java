@@ -17,6 +17,7 @@ import main.regras.Consumo;
 import main.regras.Fome;
 import main.serras.Serra;
 import main.serras.SerraPrimeira;
+import main.serras.SerraQuarta;
 import main.serras.SerraSegunda;
 import main.serras.SerraTerceira;
 
@@ -275,6 +276,27 @@ public class Game {
         this.lista_serras.add(serra3);
         synchronized (this.lista_elementos_desenhaveis) {
             this.lista_elementos_desenhaveis.add(serra3);
+        }
+
+        Serra serra4;
+        
+        do {
+        int coord_x_aleatoria;
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraQuarta.ALTURA_SERRA) - 1)));
+
+        if(this.randomico.nextBoolean()) {
+            coord_x_aleatoria = this.mapa.getCoordX();
+        } else {
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraQuarta.LARGURA_SERRA);
+        }
+        
+        serra4 = new SerraQuarta(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
+
+        } while(serra4.checarColisaoCirculos(serra4, this.jogador));
+        
+        this.lista_serras.add(serra4);
+        synchronized (this.lista_elementos_desenhaveis) {
+            this.lista_elementos_desenhaveis.add(serra4);
         }
     }
 
