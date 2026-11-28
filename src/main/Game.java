@@ -17,6 +17,8 @@ import main.regras.Consumo;
 import main.regras.Fome;
 import main.serras.Serra;
 import main.serras.SerraPrimeira;
+import main.serras.SerraSegunda;
+import main.serras.SerraTerceira;
 
 public class Game {
     public static final int LARGURA_JANELA = 1366;
@@ -237,21 +239,42 @@ public class Game {
         
         do {
         int coord_x_aleatoria;
-        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraPrimeira.ALTURA_SERRA) - 1)));
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraSegunda.ALTURA_SERRA) - 1)));
 
         if(this.randomico.nextBoolean()) {
             coord_x_aleatoria = this.mapa.getCoordX();
         } else {
-            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraPrimeira.LARGURA_SERRA);
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraSegunda.LARGURA_SERRA);
         }
         
-        serra2 = new SerraPrimeira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
+        serra2 = new SerraSegunda(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
 
         } while(serra2.checarColisaoCirculos(serra2, this.jogador));
         
         this.lista_serras.add(serra2);
         synchronized (this.lista_elementos_desenhaveis) {
             this.lista_elementos_desenhaveis.add(serra2);
+        }
+
+        Serra serra3;
+        
+        do {
+        int coord_x_aleatoria;
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraTerceira.ALTURA_SERRA) - 1)));
+
+        if(this.randomico.nextBoolean()) {
+            coord_x_aleatoria = this.mapa.getCoordX();
+        } else {
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraTerceira.LARGURA_SERRA);
+        }
+        
+        serra3 = new SerraTerceira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
+
+        } while(serra3.checarColisaoCirculos(serra3, this.jogador));
+        
+        this.lista_serras.add(serra3);
+        synchronized (this.lista_elementos_desenhaveis) {
+            this.lista_elementos_desenhaveis.add(serra3);
         }
     }
 

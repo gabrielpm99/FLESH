@@ -21,10 +21,6 @@ public abstract class Entidade implements Colidivel, Desenhavel {
         if(largura <= 0 || altura <= 0) {
             throw new IllegalArgumentException("A largura e altura devem ser positivas");
         }
-        if(velocidade <= 0) {
-            throw new IllegalArgumentException("A velocidade deve ser positiva");
-        }
-
         
         this.largura = largura;
         this.altura = altura;

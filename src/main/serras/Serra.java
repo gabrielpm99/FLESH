@@ -7,8 +7,8 @@ import main.entidade.Entidade;
 import main.mapa.Mapa;
 
 public abstract class Serra extends Entidade {
-    private int direcao_eixo_x;
-    private int direcao_eixo_y;
+    protected  int direcao_eixo_x;
+    protected  int direcao_eixo_y;
 
 
     public Serra(int largura, int altura, int velocidade, int coord_x_inicial, int coord_y_inicial, int direcao_inicial) {
