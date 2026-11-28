@@ -212,7 +212,7 @@ public class Game {
     }
 
     private void gerarSerras() {
-        Serra serra;
+        Serra serra1;
         
         do {
         int coord_x_aleatoria;
@@ -224,13 +224,34 @@ public class Game {
             coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraPrimeira.LARGURA_SERRA);
         }
         
-        serra = new SerraPrimeira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
+        serra1 = new SerraPrimeira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
 
-        } while(serra.checarColisaoCirculos(serra, this.jogador));
+        } while(serra1.checarColisaoCirculos(serra1, this.jogador));
         
-        this.lista_serras.add(serra);
+        this.lista_serras.add(serra1);
         synchronized (this.lista_elementos_desenhaveis) {
-            this.lista_elementos_desenhaveis.add(serra);
+            this.lista_elementos_desenhaveis.add(serra1);
+        }
+
+        Serra serra2;
+        
+        do {
+        int coord_x_aleatoria;
+        int coord_y_aleatoria = ((this.mapa.getCoordY() + 1) + (this.randomico.nextInt((this.mapa.getAltura() - SerraPrimeira.ALTURA_SERRA) - 1)));
+
+        if(this.randomico.nextBoolean()) {
+            coord_x_aleatoria = this.mapa.getCoordX();
+        } else {
+            coord_x_aleatoria = ((this.mapa.getCoordX() + this.mapa.getLargura()) - SerraPrimeira.LARGURA_SERRA);
+        }
+        
+        serra2 = new SerraPrimeira(coord_x_aleatoria, coord_y_aleatoria, this.randomico.nextBoolean() ? 1 : -1);
+
+        } while(serra2.checarColisaoCirculos(serra2, this.jogador));
+        
+        this.lista_serras.add(serra2);
+        synchronized (this.lista_elementos_desenhaveis) {
+            this.lista_elementos_desenhaveis.add(serra2);
         }
     }
 
